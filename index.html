@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Task Hub</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+
+  <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+    <h1 class="text-2xl font-bold mb-4 text-emerald-400">Dev Task Tracker</h1>
+
+    <!-- Input Form -->
+    <div class="flex gap-2 mb-6">
+      <input 
+        type="text" 
+        id="taskInput" 
+        placeholder="Enter a new task..." 
+        class="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-emerald-400"
+      >
+      <button 
+        id="addBtn" 
+        class="bg-blue-500 hover:bg-blue-600 text-gray-900 font-semibold px-4 py-2 rounded-lg transition"
+      >
+        Add
+      </button>
+    </div>
+
+    <!-- Task List Container -->
+    <ul id="taskList" class="space-y-3">
+      <!-- Tasks will be injected here dynamically -->
+    </ul>
+  </div>
+<script>
+    const taskInput = document.getElementById('taskInput');
+    const addBtn = document.getElementById('addBtn');
+    const taskList = document.getElementById('taskList');
+
+    // 1. Fetch tasks from our Go backend when the page loads
+    async function loadTasksFromBackend() {
+      try {
+        const response = await fetch('http://localhost:8080/tasks');
+        const tasks = await response.json();
+
+        // Clear existing list
+        taskList.innerHTML = "";
+
+        // Loop through each task from Go and render it
+        tasks.forEach(task => {
+          const li = document.createElement('li');
+          li.className = "bg-gray-700 px-4 py-2 rounded-lg flex justify-between items-center border border-gray-600";
+          li.innerHTML = `
+            <span>${task.title}</span>
+            <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 text-sm font-semibold">Delete</button>
+          `;
+          taskList.appendChild(li);
+        });
+      } catch (error) {
+        console.error("Could not connect to Go backend:", error);
+      }
+    }
+
+    // Run the function when the page loads
+    loadTasksFromBackend();
+
+    // 2. Add local task button logic (keeps what you built earlier working)
+    addBtn.addEventListener('click', function() {
+      const taskText = taskInput.value.trim();
+      if (taskText === "") return;
+
+      const li = document.createElement('li');
+      li.className = "bg-gray-700 px-4 py-2 rounded-lg flex justify-between items-center border border-gray-600";
+      li.innerHTML = `
+        <span>${taskText}</span>
+        <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 text-sm font-semibold">Delete</button>
+      `;
+      taskList.appendChild(li);
+      taskInput.value = "";
+    });
+  </script>
+</body>
+</html>
